@@ -1,5 +1,7 @@
 /* > json.c */
 /* (C) Daniel F. Smith, 2019 */
+/* SPDX-License-Identifier: LGPL-3.0-only */
+
 /* Stack-based JSON parser following http://www.json.org charts. */
 
 #ifdef ARDUINO

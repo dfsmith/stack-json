@@ -1,16 +1,16 @@
 /* > json.h */
 /* (C) Daniel F. Smith, 2019 */
+/* SPDX-License-Identifier: LGPL-3.0-only */
+
 /* Stack-based in-place JSON parser. */
 
 /* The json_parse() function will scan the text given to it,
  * calling a function every time a value is found.  That function
  * can pick off interesting values.
  *
- * See usage examples in the main C file.
- *
  * Because the parser runs on the JSON string in-place, most
  * strings are handled as a json_nchar, which is a pointer
- * and string length.  These strings should be printed as:
+ * and length.  These strings should be printed as:
  * printf("%.*s",str.n,str.s);
  */
 
@@ -25,8 +25,8 @@ typedef const char *json_in;
 
 /* A pointer,length string type. */
 typedef struct {
-        json_in s;
-        int n;
+        json_in s; /* pointer to start of string */
+        int n;     /* length of string */
 } json_nchar;
 
 /* A value that a JSON entity can have.  Note that json_type_object
@@ -46,8 +46,8 @@ typedef struct {
                 bool truefalse;    /* ... json_type_bool */
                 double number;     /* ... json_type_number */
                 json_nchar string; /* ... json_type_string */
-                json_in object;    /* ... json_type_object */
-                json_in array;     /* ... json_type_array */
+                json_in object;    /* ... json_type_object (pointer to start) */
+                json_in array;     /* ... json_type_array (pointer to start) */
         };
 } json_value;
 
@@ -62,10 +62,9 @@ struct json_valuecontext_s {
         json_value value; /* the value of the entity */
 };
 
-
 /* A set of user-provided callback functions. If functions are NULL,
- * some suitable stdout functions will be used: see the default
- * values for these functions in the main file for an example.
+ * then some suitable printing functions will be used: see the default
+ * values for these functions in the main file.
  */
 typedef struct {
         /* user context */
@@ -89,23 +88,23 @@ typedef struct {
 
 /* -- utility functions -- */
 
-/* Convert a json_value string to UTF-8.
+/* Convert a json_nchar string to UTF-8.
  * Returns required length of dest or 0 on error.
  */
 extern size_t json_string_to_utf8(char *dest,size_t destlen,const json_nchar *in);
 
-/* Print the chain of path variables to the context.
- * Returns the final valuecontext.
+/* Print the chain of path variables described by the context.
+ * Returns the final (leaf) json_valuecontext.
  */
 extern const json_valuecontext *json_printpath(const json_valuecontext *c);
 
 /* Print a value. */
 extern void json_printvalue(const json_value *v);
 
-/* Returns true if the name matches the context. See example. */
+/* Returns true if the name matches the context. */
 extern bool json_matches_name(const json_valuecontext *c,const char *name);
 
-/* Returns true if the index matches the context. See example. */
+/* Returns true if the index matches the context. */
 extern bool json_matches_index(const json_valuecontext *c,int index);
 
 /* Returns true if the arguments match the context path.
@@ -113,6 +112,9 @@ extern bool json_matches_index(const json_valuecontext *c,int index);
  * Use "#" to match an array, optionally "#nnn" to match index nnn.
  * Use "*" to match any element.
  * Use "**" to match all remaining elements.
+ * Example: json_matches_path(c,"first","second","#1",NULL) will match "yes"
+ *          in {"first":{"second":["no","yes","no"]}}
+ * Note: typically used in got_value() callback.
  */
 extern bool json_matches_path(const json_valuecontext *c,...);
 
