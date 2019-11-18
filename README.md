@@ -7,7 +7,7 @@ found, it calls a user-supplied function which can filter out any desired
 values.
 
 All processing is done on the text in-place.  The context of the current parse
-is stored in the stack.
+is stored in the stack.  There is no heap (malloc, etc.) use.
 
 Here is a small, non-trivial, example:
 ```C
@@ -47,3 +47,5 @@ int main(void) {
 }
 ```
 The code follows the state charts in https://json.org.
+
+The library object compiles down to about 11KB with gcc -Os on x86_64.

@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "json.h"
 
 static void showutf(const char *src,size_t lenmod) {
@@ -39,6 +40,18 @@ static void showutf(const char *src,size_t lenmod) {
         }
 }
 
+static char *allocutf(const char *src) {
+        size_t s;
+        char *r;
+        json_nchar srcn={src,strlen(src)+1};
+
+        s=json_string_to_utf8(NULL,0,&srcn);
+        if (!s) return NULL;
+        r=malloc(s);
+        json_string_to_utf8(r,s,&srcn);
+        return r;
+}
+
 int main(void) {
         showutf("bonjour gar\\u00e7on",0);
         showutf("hello you\\b\\b\\bme!",0);
@@ -47,5 +60,11 @@ int main(void) {
         showutf("snowman \\u2603 star \\u2606",-2); /* invalid */
         showutf("invalid \\u23zz unicode",0); /* invalid */
         showutf("snowman line \\u2603\\u2603\\u2603\\u2603\\u2603\\u2603 ends",0);
+
+        char *m;
+        m=allocutf("comet \\u2604 lightning \\u2607 star \\u2606 hurrah!\n");
+        printf("%s",(m)?m:"<invalid string>");
+        free(m);
+
         return 0;
 }
