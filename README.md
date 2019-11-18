@@ -1,12 +1,15 @@
 # stack-json
 
-Lightweight JSON interpreter in C.
+Lightweight JSON parser in C.
 
-This code is a single-pass interpreter over a JSON text
-structure.  For every value found, it calls a user-supplied
-function which can filter out any desired values.
+This library runs a single-pass over a JSON text structure.  For every value
+found, it calls a user-supplied function which can filter out any desired
+values.
 
-Here is a small example:
+All processing is done on the text in-place.  The context of the current parse
+is stored in the stack.
+
+Here is a small, non-trivial, example:
 ```C
 /* Pick off the value ["johnny"][5] */
 
@@ -24,7 +27,10 @@ const char *json="{\
                 \"passed out\"]\
 }";
 
-static void johnny5(const json_valuecontext *root,const json_value *v,void *context) {
+static void johnny5(
+        const json_valuecontext *root,
+        const json_value *v,
+        void *context) {
         (void)context; /* subdue unused warning */
 
         if (json_matches_path(root,"johnny","#5",NULL)) {
@@ -40,3 +46,4 @@ int main(void) {
         return json_parse(&cb,json)!=NULL;
 }
 ```
+The code follows the state charts in https://json.org.
